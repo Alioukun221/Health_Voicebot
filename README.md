@@ -11,15 +11,6 @@
 ![Gemini](https://img.shields.io/badge/Google-Gemini%20%2B%20ADK-4285F4?logo=google&logoColor=white)
 ![WhatsApp](https://img.shields.io/badge/WhatsApp-Cloud%20API-25D366?logo=whatsapp&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
-![AWS](https://img.shields.io/badge/AWS-Lightsail-FF9900?logo=amazonaws&logoColor=white)
-
-<br/>
-
-<a href="https://wa.me/221769329923"><img src="https://img.shields.io/badge/💬_Try_SunuChat-%2B221_76_932_99_23-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="Try SunuChat on WhatsApp"/></a>
-
-<a href="https://wa.me/221769329923"><img src="assets/qr_whatsapp.png" width="220" alt="SunuChat WhatsApp QR code"/></a>
-
-*Scan the QR code or click the button, then send a voice note in Wolof, Pulaar, or Sereer.*
 
 </div>
 
