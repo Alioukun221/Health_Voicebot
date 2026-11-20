@@ -282,9 +282,8 @@ que tu lui indiques le poste de santé le plus proche. Ne cite pas le texte du b
 de son quartier ou de son village. La réponse est souvent écoutée en vocal : sois très concret."""
 
 
-def _alertes_sanitaires() -> str:
-    """Alertes officielles récentes de la veille : l'agent peut en parler si on lui demande
-    « qu'est-ce qui se passe en ce moment ? »."""
+def _health_alerts() -> str:
+    """Recent official alerts from surveillance: the agent can reference them when asked."""
     from sunuchat import veille
 
     try:
@@ -300,6 +299,10 @@ def _alertes_sanitaires() -> str:
     )
 
 
+# Backward compatibility alias
+_alertes_sanitaires = _health_alerts
+
+
 SANTE_SERER = """
 IMPORTANT : ta réponse sera dite en sérère, et la traduction ne dispose que d'un dictionnaire
 de santé. Écris donc un français très simple : 3 ou 4 phrases courtes, une idée par phrase,
@@ -311,7 +314,7 @@ personne va mieux) :
 {phrases}"""
 
 
-def sante_instruction(ctx: ReadonlyContext) -> str:
+def health_instruction(ctx: ReadonlyContext) -> str:
     state = ctx.state
     profil = {
         cle: state.get(f"user:{cle}")
@@ -348,6 +351,10 @@ def sante_instruction(ctx: ReadonlyContext) -> str:
         .replace("{texte_fr}", state.get("texte_fr", ""))
         .replace("{passages}", state.get("passages", ""))
     )
+
+
+# Backward compatibility alias
+sante_instruction = health_instruction
 
 
 async def rechercher_sources(question: str) -> dict:
@@ -519,7 +526,7 @@ def _maps_toolset():
     ]
 
 
-async def after_sante(callback_context: CallbackContext) -> None:
+async def after_health(callback_context: CallbackContext) -> None:
     """Le message d'urgence est toujours présent en cas d'alerte, quoi que réponde le modèle."""
     state = callback_context.state
     alertes = state.get("alertes") or []
@@ -528,6 +535,10 @@ async def after_sante(callback_context: CallbackContext) -> None:
         state["reponse_fr"] = (
             rules.urgency_message(alertes, get_settings().samu_number) + "\n\n" + reponse
         ).strip()
+
+
+# Backward compatibility alias
+after_sante = after_health
 
 
 # ---------- Étape 3 : traduction ----------
@@ -587,7 +598,7 @@ Message :
 {reponse_fr}"""
 
 
-def traduction_prompt(langue: str, reponse_fr: str) -> str:
+def translation_prompt(langue: str, reponse_fr: str) -> str:
     if langue == "serer":
         glossaire = serer.format_glossary(serer.glossary(reponse_fr))
         return (
@@ -612,6 +623,10 @@ def traduction_prompt(langue: str, reponse_fr: str) -> str:
     )
 
 
+# Backward compatibility alias
+traduction_prompt = translation_prompt
+
+
 def translation_language(state) -> str:
     """Langue de la réponse. Une consigne d'urgence ne part jamais dans un sérère que personne
     n'a relu : elle part en wolof, tant que phrases.tsv n'a pas de phrases d'urgence validées."""
@@ -621,8 +636,12 @@ def translation_language(state) -> str:
     return langue
 
 
-def traduction_instruction(ctx: ReadonlyContext) -> str:
-    return traduction_prompt(translation_language(ctx.state), ctx.state.get("reponse_fr", ""))
+def translation_instruction(ctx: ReadonlyContext) -> str:
+    return translation_prompt(translation_language(ctx.state), ctx.state.get("reponse_fr", ""))
+
+
+# Backward compatibility alias
+traduction_instruction = translation_instruction
 
 
 def _translation_config(s) -> types.GenerateContentConfig:
@@ -732,9 +751,17 @@ class Fidelite(BaseModel):
     )
 
     @property
-    def fidele(self) -> bool:
+    def faithful(self) -> bool:
         """Un détail perdu ne bloque pas : seuls l'essentiel et les contresens comptent."""
         return not (self.consignes_essentielles_perdues or self.contresens)
+
+    @property
+    def fidele(self) -> bool:
+        return self.faithful
+
+
+# Backward compatibility alias
+Faithfulness = Fidelite
 
 
 FIDELITE_PROMPT = """Un texte sérère a été composé, mot par mot, avec un dictionnaire, pour dire un
@@ -785,7 +812,7 @@ async def check_meaning(reponse_fr: str, texte: str) -> Fidelite:
     return Fidelite.model_validate_json(r.text or "{}")
 
 
-async def after_traduction(callback_context: CallbackContext) -> None:
+async def after_translation(callback_context: CallbackContext) -> None:
     """Sérère : la réponse ne part que si chaque mot vient du dictionnaire et si, retraduite,
     elle garde les consignes essentielles sans contresens ; sinon, elle part en wolof (mieux
     vaut un wolof juste qu'un sérère inventé ou trompeur). Un détail perdu ne bloque pas."""
@@ -833,6 +860,10 @@ async def after_traduction(callback_context: CallbackContext) -> None:
         log.exception("Traduction wolof impossible")
         state["reponse_finale"] = ""  # main.py envoie alors le message d'excuse
     state["langue_reponse"] = "wolof"
+
+
+# Backward compatibility alias
+after_traduction = after_translation
 
 
 # ---------- Assemblage ----------

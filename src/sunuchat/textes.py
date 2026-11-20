@@ -13,11 +13,15 @@ comprennent, avec la voix wolof.
 LANGUES = ("wolof", "pulaar", "serer")
 
 
-def texte(textes: dict[str, str], langue: str) -> tuple[str, str]:
-    """(texte, langue de la voix) : la version wolof quand la langue n'a pas encore la sienne."""
-    if langue in textes:
-        return textes[langue], langue
-    return textes["wolof"], "wolof"
+def get_text(catalog: dict[str, str], language: str) -> tuple[str, str]:
+    """(text, voice_language): defaults to Wolof version when a language has no translation."""
+    if language in catalog:
+        return catalog[language], language
+    return catalog["wolof"], "wolof"
+
+
+# Backward compatibility alias
+texte = get_text
 
 
 ERREUR = {

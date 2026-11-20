@@ -289,8 +289,8 @@ class _ignore:
         return exc[0] is not None and issubclass(exc[0], (ValueError, TypeError, IndexError))
 
 
-def date_fr(text: str) -> datetime | None:
-    """« Lundi, décembre 15, 2025 » ou « 15 décembre 2025 » → datetime (UTC)."""
+def parse_french_date(text: str) -> datetime | None:
+    """« Lundi, décembre 15, 2025 » or « 15 décembre 2025 » → datetime (UTC)."""
     text = (text or "").lower()
     month = next((n for nom, n in MOIS.items() if nom in text), None)
     numbers = [int(x) for x in re.findall(r"\d+", text)]
@@ -301,6 +301,10 @@ def date_fr(text: str) -> datetime | None:
     with _ignore():
         return datetime(year, month, day, tzinfo=UTC)
     return None
+
+
+# Backward compatibility alias
+date_fr = parse_french_date
 
 
 async def collect_ministere_rss(client: httpx.AsyncClient) -> list[Publication]:
@@ -705,10 +709,13 @@ def source_note(alerte: dict) -> str:
 _voice_cache: dict[tuple[str, str], bytes] = {}
 
 
-def langue_alerte(langue: str) -> str:
-    """Wolof ou pulaar. Une alerte sans relecture humaine ne part jamais dans un sérère que
-    personne n'a relu (comme les consignes d'urgence de l'agent) : elle part en wolof."""
-    return langue if langue in ("wolof", "pulaar") else "wolof"
+def alert_language(lang: str) -> str:
+    """Wolof or Pulaar. Automated alerts fall back to Wolof for Sereer speakers."""
+    return lang if lang in ("wolof", "pulaar") else "wolof"
+
+
+# Backward compatibility alias
+langue_alerte = alert_language
 
 
 async def send_alert(numero: str, alerte: dict, langue: str) -> None:
@@ -817,12 +824,16 @@ def _alert_from_row(row: tuple) -> dict:
     }
 
 
-def date_fr_short(text: str) -> datetime | None:
+def format_short_date(text: str) -> datetime | None:
     """« 12/10/2026 » → datetime (UTC)."""
     try:
         return datetime.strptime(text, "%d/%m/%Y").replace(tzinfo=UTC)
     except (TypeError, ValueError):
         return None
+
+
+# Backward compatibility alias
+date_fr_short = format_short_date
 
 
 _ALERT_COLUMNS = (
@@ -858,22 +869,26 @@ async def deliver_pending(numero: str, langue: str) -> int:
     return sent
 
 
-def alertes_en_cours(jours: int = PENDING_DAYS) -> str:
-    """Alertes diffusées ces derniers jours, une par ligne, pour le prompt de l'agent."""
+def active_alerts(days: int = PENDING_DAYS) -> str:
+    """Alerts broadcast in recent days, formatted one per line for the agent prompt."""
     con = _db()
-    since = _iso(_now() - timedelta(days=jours))
+    since = _iso(_now() - timedelta(days=days))
     rows = con.execute(
         f"SELECT {_ALERT_COLUMNS} FROM publications p WHERE p.diffusee_le >= ? "
         "ORDER BY p.diffusee_le DESC LIMIT 5",
         (since,),
     ).fetchall()
     con.close()
-    lignes = []
+    lines = []
     for row in rows:
         a = _alert_from_row(row)
-        ou = ", ".join(a["regions"]) or "tout le Sénégal"
-        lignes.append(f"- {a['sujet']} ({ou}), {a['source']} {a['date']} : {a['message_fr']}")
-    return "\n".join(lignes)
+        where = ", ".join(a["regions"]) or "tout le Sénégal"
+        lines.append(f"- {a['sujet']} ({where}), {a['source']} {a['date']} : {a['message_fr']}")
+    return "\n".join(lines)
+
+
+# Backward compatibility alias
+alertes_en_cours = active_alerts
 
 
 # ---------- Planification ----------
