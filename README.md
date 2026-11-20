@@ -157,12 +157,10 @@ flowchart TB
     R -. "Critical emergency" .-> SAMU["🚑 Emergency Alert<br/>+ SAMU 1515 Contact Card"]
 ```
 
-| Pipeline Stage | Primary Function | Recommended Model |
+| Component | Role | Model |
 |---|---|---|
-| **Comprehension** | Language detection, intent parsing, French pivot translation | `gemini-flash-lite-latest` (ultra low-latency) |
-| **Health Reasoning** | Clinical decision-making, tool execution, safety grounding | `gemini-3.8-flash` |
-| **Translation** | Cultural nuance, localized audio synthesis script | `gemini-3.1-pro-preview` |
-| **Prescription Vision**| Handwritten prescription OCR, dosage table extraction | `gemini-3.1-pro-preview` |
+| **Health Reasoning** | Clinical decision-making, tool execution, and safety grounding | `gemini-3.8-flash` |
+| **Prescription Vision (OCR)** | Handwritten prescription OCR and structured dosage extraction | `gemini-3.1-pro-preview` |
 
 ### Retrieval-Augmented Generation (RAG)
 
