@@ -241,8 +241,8 @@ Embeddings run **locally inside the container** using `BAAI/bge-m3`—ensuring z
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/Alioukun221/Sunuchat_Voicebot.git
-cd Sunuchat_Voicebot
+git clone https://github.com/Alioukun221/Sunuchat.git
+cd Sunuchat
 
 # 2. Install dependencies with uv
 uv sync
